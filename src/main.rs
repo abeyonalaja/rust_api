@@ -6,6 +6,8 @@ use dotenv::dotenv;
 use listenfd::ListenFd;
 use std::env;
 
+mod user;
+
 #[get("/")]
 async fn index() -> impl Responder {
     HttpResponse::Ok().body("Hello worlds!")
@@ -17,7 +19,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     let mut listenfd = ListenFd::from_env();
-    let mut server = HttpServer::new(|| App::new().service(index));
+    let mut server = HttpServer::new(|| App::new().configure(user::init_routes));
 
     server = match listenfd.take_tcp_listener(0)? {
         Some(listener) => server.listen(listener)?,
